@@ -1,24 +1,16 @@
 import { Router } from 'express';
-import { SessionsManagerMONGO as SessionsManager } from '../dao/sessionsManagerMONGO.js';
-import { hashPassword,validatePassword } from '../utils.js';
-import { CartManagerMONGO as CartManager } from '../dao/cartManagerMONGO.js';
-import { authUserIsLogged } from '../middleware/auth.js';
+// import { SessionsManagerMONGO as SessionsManager } from '../dao/sessionsManagerMONGO.js';
+// import { hashPassword,validatePassword } from '../utils.js';
+// import { CartManagerMONGO as CartManager } from '../dao/cartManagerMONGO.js';
+// import { authUserIsLogged } from '../middleware/auth.js';
 import passport from "passport";
 
 export const router=Router();
 
-// const sessionsManager = new SessionsManager()
-// const cartManager = new CartManager()
-
 router.post('/registro',passport.authenticate("registro",{failureMessage:true,failureRedirect:"/api/sessions/error"}),async(req,res)=>{
-    let {web} = req.body
     const newUser = {...req.user}
     delete newUser.password
 
-    //front end not working -- future improvement (see /js/signup)
-    // if(web){
-    //     return res.status(301).redirect('/login')
-    // }
     const acceptHeader = req.headers['accept']
     if(acceptHeader.includes('text/html')){
         return res.status(301).redirect('/login')
@@ -38,14 +30,10 @@ router.post('/registro',passport.authenticate("registro",{failureMessage:true,fa
 })
 
 router.post('/login',passport.authenticate("login",{failureMessage:true,failureRedirect:"/api/sessions/error"}),async(req,res)=>{
-    //const {web} = req.body
     const authenticatedUser ={...req.user}
     delete authenticatedUser.password
     req.session.user = authenticatedUser    
     
-    // if(web){
-    //     return res.status(301).redirect('/products')
-    // }
     const acceptHeader = req.headers['accept']
     if(acceptHeader.includes('text/html')){
         return res.status(301).redirect('/products')
