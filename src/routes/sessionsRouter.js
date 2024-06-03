@@ -16,7 +16,11 @@ router.post('/registro',passport.authenticate("registro",{failureMessage:true,fa
     delete newUser.password
 
     //front end not working -- future improvement (see /js/signup)
-    if(web){
+    // if(web){
+    //     return res.status(301).redirect('/login')
+    // }
+    const acceptHeader = req.headers['accept']
+    if(acceptHeader.includes('text/html')){
         return res.status(301).redirect('/login')
     }
 
@@ -34,27 +38,56 @@ router.post('/registro',passport.authenticate("registro",{failureMessage:true,fa
 })
 
 router.post('/login',passport.authenticate("login",{failureMessage:true,failureRedirect:"/api/sessions/error"}),async(req,res)=>{
-    const {web} = req.body
+    //const {web} = req.body
     const authenticatedUser ={...req.user}
     delete authenticatedUser.password
     req.session.user = authenticatedUser    
     
-    if(web){
+    // if(web){
+    //     return res.status(301).redirect('/products')
+    // }
+    const acceptHeader = req.headers['accept']
+    if(acceptHeader.includes('text/html')){
         return res.status(301).redirect('/products')
     }
+
     res.setHeader('Content-type', 'application/json');
     return res.status(200).json({
         status: 'success',
         message: 'User login was completed successfully',
         payload: {
-            nombre: authenticatedUser.nombre,
-            apellido: authenticatedUser.apellido,
-            edad: authenticatedUser.edad,
+            nombre: authenticatedUser.first_name,
+            apellido: authenticatedUser.last_name,
+            edad: authenticatedUser.age,
             email: authenticatedUser.email,
             rol:authenticatedUser.rol,
             carrito:authenticatedUser.cart
         }
     })      
+})
+
+router.get('/current', async(req,res)=>{
+    const currentUser={...req.user}
+    req.session.user=currentUser
+
+    const acceptHeader = req.headers['accept']
+    if(acceptHeader.includes('text/html')){
+        return res.status(301).redirect('/perfil')
+    }
+
+    res.setHeader('Content-type', 'application/json');
+    return res.status(200).json({
+        status:'success',
+        message: 'current user was obtained successfully',
+        payload:{
+            nombre: currentUser.first_name,
+            apellido: currentUser.last_name,
+            edad: currentUser.age,
+            email: currentUser.email,
+            rol:currentUser.rol,
+            carrito:currentUser.cart
+        }    
+    })
 })
 
 router.get('/logout', async(req,res)=>{
