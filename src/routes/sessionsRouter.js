@@ -1,13 +1,12 @@
 import { Router } from 'express';
-// import { SessionsManagerMONGO as SessionsManager } from '../dao/sessionsManagerMONGO.js';
-// import { hashPassword,validatePassword } from '../utils.js';
-// import { CartManagerMONGO as CartManager } from '../dao/cartManagerMONGO.js';
-// import { authUserIsLogged } from '../middleware/auth.js';
+import { passportCallError } from '../utils.js';
 import passport from "passport";
+import {auth} from '../middleware/auth.js'
 
 export const router=Router();
 
-router.post('/registro',passport.authenticate("registro",{failureMessage:true,failureRedirect:"/api/sessions/error"}),async(req,res)=>{
+//router.post('/registro',passport.authenticate("registro",{failureMessage:true,failureRedirect:"/api/sessions/error"}),async(req,res)=>{
+router.post('/registro',passportCallError("registro"),async(req,res)=>{
     const newUser = {...req.user}
     delete newUser.password
 
@@ -29,7 +28,8 @@ router.post('/registro',passport.authenticate("registro",{failureMessage:true,fa
     })
 })
 
-router.post('/login',passport.authenticate("login",{failureMessage:true,failureRedirect:"/api/sessions/error"}),async(req,res)=>{
+// router.post('/login',passport.authenticate("login",{failureMessage:true,failureRedirect:"/api/sessions/error"}),async(req,res)=>{
+router.post('/login',passportCallError("login"),async(req,res)=>{
     const authenticatedUser ={...req.user}
     delete authenticatedUser.password
     req.session.user = authenticatedUser    
@@ -54,9 +54,11 @@ router.post('/login',passport.authenticate("login",{failureMessage:true,failureR
     })      
 })
 
-router.get('/current', async(req,res)=>{
-    const currentUser={...req.user}
-    req.session.user=currentUser
+//passportCallError("login"),
+router.get('/current', auth, async(req,res)=>{
+    //const currentUser={...req.user}
+    //req.session.user= currentUser
+    const currentUser = req.session.user
 
     const acceptHeader = req.headers['accept']
     if(acceptHeader.includes('text/html')){

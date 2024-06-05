@@ -25,31 +25,32 @@ export const initPassport=()=>{
                 try {
                     //const {nombre} = req.body
                     const {first_name, last_name, age} = req.body
+
                     if(!first_name){  
                         console.log(`Failed to complete signup due to missing name.Please make sure all mandatory fields(*)are completed to proceed with signup`)
-                        return done(null,false)
+                        return done(null,false, {message: `Signup failed: Must complete all signup required data to access`})
                     }
 
                     if(!last_name){  
                         console.log(`Failed to complete signup due to missing lastname.Please make sure all mandatory fields(*)are completed to proceed with signup`)
-                        return done(null,false)
+                        return done(null,false), {message: `Signup failed: Must complete all signup required data to access`}
                     }
 
                     if(!age){  
                         console.log(`Failed to complete signup due to missing age.Please make sure all mandatory fields(*)are completed to proceed with signup`)
-                        return done(null,false)
+                        return done(null,false, {message: `Signup failed: Must complete all signup required data to access`})
                     }
                 
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if(!emailRegex.test(username)){
                         console.log(`The email ${username} does not match a valid email format. Other types of data structures are not accepted as an email address. Please verify and try again`)
-                        return done(null,false)
+                        return done(null,false, {message: `Signup failed: missing credentials: invalid email format - please try again`})
                     }
                 
                     const emailAlreadyExists = await usersManager.getUserByFilter({email:username})
                     if(emailAlreadyExists){
                         console.log(`The email you are trying to register (email: ${username}) already exists in our database and cannot be duplicated. Please try again using a diferent email.`)
-                        return done(null,false)
+                        return done(null,false, {message: `Signup failed: Email already exists and cannot be duplicated - please try again.`})
                     }
                    
                     password = hashPassword(password)                  
@@ -73,11 +74,17 @@ export const initPassport=()=>{
                 usernameField: "email",
             },
             async(username,password,done)=>{
-                try {                 
+                try { 
+                    
+                    if(!username || !password){
+                        done(null,false, {message: `Login failed - all fields must be completed - please verify and try again`}) 
+                    }
+                    
+
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if(!emailRegex.test(username)){
                         console.log(`The email ${username} does not match a valid email format. Other types of data structures are not accepted as an email address. Please verify and try again`)
-                        done(null,false)
+                        done(null,false, {message: `Login failed - email format is not valid - please verify and try again`})
                     }
 
                     if(username=="adminCoder@coder.com" && password=="adminCod3r123"){
@@ -94,12 +101,12 @@ export const initPassport=()=>{
                     const userIsValid = await usersManager.getUserByFilter({email:username})
                     if(!userIsValid){
                         console.log(`Failed to complete login. The email provided (email:${username} was not found in our database. Please verify and try again`)
-                        return done(null,false)
+                        return done(null,false, {message: `Login failed - email was not found -please try again`})
                     }
                         
                     if(!validatePassword(password,userIsValid.password)){
                             console.log( `The password you provided does not match our records. Please verify and try again.`)
-                            return done(null,false)
+                            return done(null,false, {message: `Login failed - invalid password please verify and try again`})
                     }                
                 
                     return done(null,userIsValid)
@@ -121,19 +128,13 @@ export const initPassport=()=>{
             },
             async(accessToken,refreshToken,profile,done)=>{
                 try {
-                    // console.log(profile)
                     const email=profile._json.email
                     const first_name= profile._json.name
-                    // const last_name= 'NotApplicable: githubConnection'
-                    // const age= 'NotApplicable: githubConnection'
-                    // const password= 'NotApplicable: githubConnection'
                     let authenticatedUser = await usersManager.getUserByFilter({email})
                     if(!authenticatedUser){
                         const newCart= await cartManager.createCart()
                         authenticatedUser=await usersManager.createUser({
                             first_name, email, cart:newCart._id, profile
-                           // first_name, last_name, age, email, cart:newCart._id, password, profile
-                            //nombre,email,cart:newCart._id,profile
                         })        
                     }
                     return done(null,authenticatedUser)
@@ -143,9 +144,6 @@ export const initPassport=()=>{
             }
         )
     )
-
-   // usersManager.createUser({first_name, last_name, age,email:username,password,cart:newCart._id})
-
 
     // ------------- serializer + deserializer for apps w sessions ---------//
     passport.serializeUser((user, done)=>{
