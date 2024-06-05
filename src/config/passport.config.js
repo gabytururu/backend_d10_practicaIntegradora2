@@ -2,12 +2,10 @@ import passport from "passport";
 import local from "passport-local";
 import github from "passport-github2";
 import dotenv from "dotenv";
-import { SessionsManagerMONGO as SessionsManager} from "../dao/sessionsManagerMONGO.js";
 import { CartManagerMONGO as CartManager } from "../dao/cartManagerMONGO.js";
 import { usersManagerMongo as UsersManager } from "../dao/usersManagerMONGO.js";
 import { hashPassword, validatePassword } from "../utils.js";
 
-const sessionsManager = new SessionsManager()
 const cartManager = new CartManager()
 const usersManager = new UsersManager()
 
@@ -33,7 +31,7 @@ export const initPassport=()=>{
 
                     if(!last_name){  
                         console.log(`Failed to complete signup due to missing lastname.Please make sure all mandatory fields(*)are completed to proceed with signup`)
-                        return done(null,false), {message: `Signup failed: Must complete all signup required data to access`}
+                        return done(null,false, {message: `Signup failed: Must complete all signup required data to access`})
                     }
 
                     if(!age){  

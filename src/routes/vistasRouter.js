@@ -1,13 +1,11 @@
 import { Router } from 'express';
 import { ProductManagerMONGO as ProductManager } from '../dao/productManagerMONGO.js';
 import { CartManagerMONGO as CartManager } from '../dao/cartManagerMONGO.js';
-import { SessionsManagerMONGO as SessionsManager } from '../dao/sessionsManagerMONGO.js';
 import { auth, authManager, authUserIsLogged } from '../middleware/auth.js';
 export const router=Router();
 
 const productManager = new ProductManager();
 const cartManager = new CartManager();
-//const sessionsManager = new SessionsManager();
 
 router.get('/',async(req,res)=>{
     res.status(301).redirect('/login');
