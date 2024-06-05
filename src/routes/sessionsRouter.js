@@ -5,7 +5,6 @@ import {auth} from '../middleware/auth.js'
 
 export const router=Router();
 
-//router.post('/registro',passport.authenticate("registro",{failureMessage:true,failureRedirect:"/api/sessions/error"}),async(req,res)=>{
 router.post('/registro',passportCallError("registro"),async(req,res)=>{
     const newUser = {...req.user}
     delete newUser.password
@@ -28,7 +27,6 @@ router.post('/registro',passportCallError("registro"),async(req,res)=>{
     })
 })
 
-// router.post('/login',passport.authenticate("login",{failureMessage:true,failureRedirect:"/api/sessions/error"}),async(req,res)=>{
 router.post('/login',passportCallError("login"),async(req,res)=>{
     const authenticatedUser ={...req.user}
     delete authenticatedUser.password
@@ -54,10 +52,7 @@ router.post('/login',passportCallError("login"),async(req,res)=>{
     })      
 })
 
-//passportCallError("login"),
 router.get('/current', auth, async(req,res)=>{
-    //const currentUser={...req.user}
-    //req.session.user= currentUser
     const currentUser = req.session.user
 
     const acceptHeader = req.headers['accept']
